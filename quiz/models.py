@@ -173,7 +173,7 @@ class Progress(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, verbose_name=_("User"), on_delete=models.CASCADE)
 
     score = models.CharField(validators=[validate_comma_separated_integer_list], max_length=1024,
-                                              verbose_name=_("Score"))
+                             verbose_name=_("Score"))
 
     correct_answer = models.CharField(max_length=10, verbose_name=_('Correct Answers'))
 
@@ -289,12 +289,9 @@ class SittingManager(models.Manager):
 
     def new_sitting(self, user, quiz):
         if quiz.random_order is True:
-            question_set = quiz.question_set.all() \
-                                            .select_subclasses() \
-                                            .order_by('?')
+            question_set = quiz.question_set.all().select_subclasses().order_by('?')
         else:
-            question_set = quiz.question_set.all() \
-                                            .select_subclasses()
+            question_set = quiz.question_set.all().select_subclasses()
 
         question_set = [item.id for item in question_set]
 
