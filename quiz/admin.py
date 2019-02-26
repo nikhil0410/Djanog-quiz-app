@@ -10,7 +10,8 @@ from .models import CSVUpload
 
 class CSVUploadsAdmin(admin.ModelAdmin):
     model = CSVUpload
-    list_display= ('title',)
+    list_display = ('title',)
+
 
 class AnswerInline(admin.TabularInline):
     model = Answer

@@ -11,7 +11,7 @@ from model_utils.managers import InheritanceManager
 from django.db.models.signals import pre_save, post_save
 import io
 from .signals import csv_uploaded
-from .validators import csv_file_validator
+from .validators import csv_file_validator, question_file_validator
 from django.contrib.auth.models import User
 from django.contrib import messages
 
@@ -572,7 +572,7 @@ class CSVUpload(models.Model):
         return self.user.username
 
 def create_user(data):
-    user =  User.objects.create_user(username=data['username'], 
+    user = User.objects.create_user(username=data['username'],
                             email=data['email'],
                             password=data['password'],
                             first_name=data['first_name'],
@@ -635,5 +635,60 @@ def csv_upload_post_save(sender, instance, created, *args, **kwargs):
 
 
 post_save.connect(csv_upload_post_save, sender=CSVUpload)
+
+class QuestionUpload(models.Model):
+    title       = models.CharField(max_length=100, verbose_name=_('Title'), blank=False)
+    user        = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    file        = models.FileField(upload_to=upload_csv_file, validators=[question_file_validator])
+    completed   = models.BooleanField(default=False)
+    # questions   = models.BooleanField(default=True)
+    # students    = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.user.username
+
+def question_upload_post_save(sender, instance, created, *args, **kwargs):
+    if not instance.completed:
+        csv_file = instance.file
+        decoded_file = csv_file.read().decode('utf-8')
+        io_string = io.StringIO(decoded_file)
+        reader = csv.reader(io_string, delimiter=';', quotechar='|')
+        header_ = next(reader)
+        header_cols = convert_header(header_)
+        print(header_cols, str(len(header_cols)))
+        parsed_items = []
+
+        '''
+        if using a custom signal
+        '''
+        # for line in reader:
+        #     # print(line)
+        #     parsed_row_data = {}
+        #     i = 0
+        #     print(line[0].split(','), len(line[0].split(',')))
+        #     row_item = line[0].split(',')
+        #     for item in row_item:
+        #         key = header_cols[i]
+        #         parsed_row_data[key] = item
+        #         i+=1
+        #     create_user(parsed_row_data) # create user
+        #     parsed_items.append(parsed_row_data)
+        #     # messages.success(parsed_items)
+        #     print(parsed_items)
+        # csv_uploaded.send(sender=instance, user=instance.user, csv_file_list=parsed_items)
+
+        #if using a model directly
+        for line in reader:
+            new_obj = Question()
+            i = 0
+            row_item = line[0].split(',')
+            for item in row_item:
+                key = header_cols[i]
+                setattr(new_obj, key, item)
+                i+=1
+            new_obj.save()
+
+        instance.completed = True
+        instance.save()
 
 
