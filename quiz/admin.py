@@ -5,7 +5,7 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from .models import Quiz, Category, Question, Progress
 from mcq.models import MCQQuestion, Answer
 from django.utils.translation import ugettext_lazy as _
-from .models import CSVUpload
+from .models import CSVUpload, QuestionUpload
 
 
 class CSVUploadsAdmin(admin.ModelAdmin):
@@ -88,3 +88,5 @@ admin.site.register(Category, CategoryAdmin)
 admin.site.register(MCQQuestion, MCQuestionAdmin)
 admin.site.register(Progress, ProgressAdmin)
 admin.site.register(CSVUpload, CSVUploadsAdmin)
+admin.site.register(QuestionUpload)
+admin.site.register(Question)

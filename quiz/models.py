@@ -13,6 +13,8 @@ import io
 from .signals import csv_uploaded
 from .validators import csv_file_validator, question_file_validator
 from django.contrib.auth.models import User
+import mcq
+from django.db.models import Q
 from django.contrib import messages
 
 
@@ -678,17 +680,31 @@ def question_upload_post_save(sender, instance, created, *args, **kwargs):
         # csv_uploaded.send(sender=instance, user=instance.user, csv_file_list=parsed_items)
 
         #if using a model directly
+        answer_list = ['A','B','C','D',]
         for line in reader:
-            new_obj = Question()
-            i = 0
-            row_item = line[0].split(',')
-            for item in row_item:
-                key = header_cols[i]
-                setattr(new_obj, key, item)
-                i+=1
-            new_obj.save()
+            row_item = line[0].split(',')#the value of entire row
+            cate = row_item[7]+'-'+row_item[8]
+            cat = Category.objects.filter(category=cate).count()
+            if cat ==0:
+                Category.objects.create(category=row_item[7]+'-'+row_item[8])
+            cat = Category.objects.get(category=row_item[7] + '-' + row_item[8])
+            Que = mcq.models.MCQQuestion.objects.filter(content=row_item[1]).count()
+            print(Que)
+            if Que==0:
+                Que = mcq.models.MCQQuestion.objects.create(content=row_item[1], category=cat, answer_order='none')
+                # Que = mcq.models.MCQQuestion.objects.get_or_create(answer_order='none')
+                for i in range(4):
+                    ans = False
+                    if row_item[6] == answer_list[i]:
+                        ans = True
+                    mcq.models.Answer.objects.create(question=Que, content=row_item[i+2], correct=ans)
+
+                print(cat.id)
+
+
 
         instance.completed = True
         instance.save()
 
 
+post_save.connect(question_upload_post_save, sender=QuestionUpload)

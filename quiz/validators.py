@@ -5,7 +5,7 @@ import io
 from django.core.exceptions import ValidationError
 
 REQUIRED_HEADER  = ['username' ,'email','password','first name','last name']
-QUESTION_HEADER  = ['question','option1','option2','option3','option4', 'answer']
+QUESTION_HEADER  = ['s no', 'Question','A','B','C','D', 'Answer', 'subject', 'Standard']
 
 def csv_file_validator(value):
     filename, ext = os.path.splitext(value.name)
