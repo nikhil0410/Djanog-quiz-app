@@ -643,11 +643,10 @@ class QuestionUpload(models.Model):
     user        = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     file        = models.FileField(upload_to=upload_csv_file, validators=[question_file_validator])
     completed   = models.BooleanField(default=False)
-    # questions   = models.BooleanField(default=True)
-    # students    = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.username
+
 
 def question_upload_post_save(sender, instance, created, *args, **kwargs):
     if not instance.completed:
@@ -657,29 +656,10 @@ def question_upload_post_save(sender, instance, created, *args, **kwargs):
         reader = csv.reader(io_string, delimiter=';', quotechar='|')
         header_ = next(reader)
         header_cols = convert_header(header_)
-        print(header_cols, str(len(header_cols)))
-        parsed_items = []
 
         '''
         if using a custom signal
         '''
-        # for line in reader:
-        #     # print(line)
-        #     parsed_row_data = {}
-        #     i = 0
-        #     print(line[0].split(','), len(line[0].split(',')))
-        #     row_item = line[0].split(',')
-        #     for item in row_item:
-        #         key = header_cols[i]
-        #         parsed_row_data[key] = item
-        #         i+=1
-        #     create_user(parsed_row_data) # create user
-        #     parsed_items.append(parsed_row_data)
-        #     # messages.success(parsed_items)
-        #     print(parsed_items)
-        # csv_uploaded.send(sender=instance, user=instance.user, csv_file_list=parsed_items)
-
-        #if using a model directly
         answer_list = ['A','B','C','D',]
         for line in reader:
             row_item = line[0].split(',')#the value of entire row
@@ -689,19 +669,13 @@ def question_upload_post_save(sender, instance, created, *args, **kwargs):
                 Category.objects.create(category=row_item[7]+'-'+row_item[8])
             cat = Category.objects.get(category=row_item[7] + '-' + row_item[8])
             Que = mcq.models.MCQQuestion.objects.filter(content=row_item[1]).count()
-            print(Que)
-            if Que==0:
+            if Que == 0:
                 Que = mcq.models.MCQQuestion.objects.create(content=row_item[1], category=cat, answer_order='none')
-                # Que = mcq.models.MCQQuestion.objects.get_or_create(answer_order='none')
                 for i in range(4):
                     ans = False
                     if row_item[6] == answer_list[i]:
                         ans = True
                     mcq.models.Answer.objects.create(question=Que, content=row_item[i+2], correct=ans)
-
-                print(cat.id)
-
-
 
         instance.completed = True
         instance.save()
