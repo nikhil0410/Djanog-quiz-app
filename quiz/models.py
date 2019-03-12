@@ -553,6 +553,75 @@ class Question(models.Model):
         return self.content
 
 
+class Standard(models.Model):
+    content = models.CharField(max_length=1000,
+                               blank=False,
+                               help_text=_("Enter the Standard text that "
+                                           "you want displayed"),
+                               verbose_name=_('Class'))
+
+    class Meta:
+        verbose_name = _("Standard")
+        verbose_name_plural = _("Standard")
+        ordering = ['content']
+
+    def __str__(self):
+        return self.content
+
+
+class Subject(models.Model):
+    content = models.CharField(max_length=1000,
+                               blank=False,
+                               help_text=_("Enter the Subject text that "
+                                           "you want displayed"),
+                               verbose_name=_('Subject'))
+
+    class Meta:
+        verbose_name = _("Subject")
+        verbose_name_plural = _("Subjects")
+        ordering = ['content']
+
+    def __str__(self):
+        return self.content
+
+
+class Chapter(models.Model):
+    content = models.CharField(max_length=1000,
+                               blank=False,
+                               help_text=_("Enter the Chapter text that "
+                                           "you want displayed"),
+                               verbose_name=_('Chapter'))
+    subject_fk = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    standard_fk = models.ForeignKey(Standard, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = _("Chapter")
+        verbose_name_plural = _("Chapters")
+        ordering = ['content']
+
+    def __str__(self):
+        return self.content
+
+
+class Topic(models.Model):
+    content = models.CharField(max_length=1000,
+                               blank=False,
+                               help_text=_("Enter the Topic text that "
+                                           "you want displayed"),
+                               verbose_name=_('Topic'))
+    subject_fk = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    standard_fk = models.ForeignKey(Standard, on_delete=models.CASCADE)
+    chapter_fk = models.ForeignKey(Chapter, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = _("Topic")
+        verbose_name_plural = _("Topics")
+        ordering = ['content']
+
+    def __str__(self):
+        return self.content
+
+
 def upload_csv_file(instance, filename):
     qs = instance.__class__.objects.filter(user=instance.user)
     if qs.exists():
