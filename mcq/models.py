@@ -31,8 +31,8 @@ class MCQQuestion(Question):
             return queryset.order_by('content')
         # if self.answer_order == 'random':
         #     return queryset.order_by('Random')
-        if self.answer_order == 'none':
-            return queryset.order_by('None')
+        else:
+            return queryset.order_by('id')
 
     def get_answers(self):
         return self.order_answers(Answer.objects.filter(question=self))
