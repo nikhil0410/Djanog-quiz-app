@@ -17,7 +17,11 @@ import mcq
 from django.db.models import Q
 from django.contrib import messages
 
-
+DIFFICULTY_CHOICE = (
+    ('Easy', 'easy'),
+    ('Normal', 'normal'),
+    ('Hard', 'hard')
+)
 class CategoryManager(models.Manager):
 
     def new_category(self, category):
@@ -287,6 +291,91 @@ class Progress(models.Model):
         return self.user.username + ' - '  + self.score
 
 
+class Standard(models.Model):
+    content = models.CharField(max_length=1000,
+                               blank=False,
+                               help_text=_("Enter the Standard text that "
+                                           "you want displayed"),
+                               verbose_name=_('Class'))
+
+    class Meta:
+        verbose_name = _("Standard")
+        verbose_name_plural = _("Standard")
+        ordering = ['content']
+
+    def __str__(self):
+        return self.content
+
+
+class Subject(models.Model):
+    content = models.CharField(max_length=1000,
+                               blank=False,
+                               help_text=_("Enter the Subject text that "
+                                           "you want displayed"),
+                               verbose_name=_('Subject'))
+
+    class Meta:
+        verbose_name = _("Subject")
+        verbose_name_plural = _("Subjects")
+        ordering = ['content']
+
+    def __str__(self):
+        return self.content
+
+
+class Chapter(models.Model):
+    content = models.CharField(max_length=1000,
+                               blank=False,
+                               help_text=_("Enter the Chapter text that "
+                                           "you want displayed"),
+                               verbose_name=_('Chapter'))
+    subject_fk = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    standard_fk = models.ForeignKey(Standard, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = _("Chapter")
+        verbose_name_plural = _("Chapters")
+        ordering = ['content']
+
+    def __str__(self):
+        return self.content
+
+
+class Topic(models.Model):
+    content = models.CharField(max_length=1000,
+                               blank=False,
+                               help_text=_("Enter the Topic text that "
+                                           "you want displayed"),
+                               verbose_name=_('Topic'))
+    subject_fk = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    standard_fk = models.ForeignKey(Standard, on_delete=models.CASCADE)
+    chapter_fk = models.ForeignKey(Chapter, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = _("Topic")
+        verbose_name_plural = _("Topics")
+        ordering = ['content']
+
+    def __str__(self):
+        return self.content
+
+
+class BloomsTaxonomy(models.Model):
+    content = models.CharField(max_length=1000,
+                               blank=False,
+                               help_text= ("Enter the Blooms Taxonomy you want to display"),
+                               verbose_name= ('Blooms Taxonomy')
+                               )
+
+    class Meta:
+        verbose_name = _("Blooms")
+        verbose_name_plural = _("Blooms")
+        ordering = ['content']
+
+    def __str__(self):
+        return self.content
+
+
 class SittingManager(models.Manager):
 
     def new_sitting(self, user, quiz):
@@ -541,6 +630,10 @@ class Question(models.Model):
                                                "after the question has "
                                                "been answered."),
                                    verbose_name=_('Explanation'))
+    topic_fk = models.ForeignKey(Topic, blank=True, null=True, on_delete=models.CASCADE)
+    difficulty_level = models.CharField(max_length=10, choices=DIFFICULTY_CHOICE, default="Easy")
+
+    blooms_fk = models.ForeignKey(BloomsTaxonomy, blank=True, null=True, on_delete=models.CASCADE)
 
     objects = InheritanceManager()
 
@@ -548,75 +641,6 @@ class Question(models.Model):
         verbose_name = _("Question")
         verbose_name_plural = _("Questions")
         ordering = ['category']
-
-    def __str__(self):
-        return self.content
-
-
-class Standard(models.Model):
-    content = models.CharField(max_length=1000,
-                               blank=False,
-                               help_text=_("Enter the Standard text that "
-                                           "you want displayed"),
-                               verbose_name=_('Class'))
-
-    class Meta:
-        verbose_name = _("Standard")
-        verbose_name_plural = _("Standard")
-        ordering = ['content']
-
-    def __str__(self):
-        return self.content
-
-
-class Subject(models.Model):
-    content = models.CharField(max_length=1000,
-                               blank=False,
-                               help_text=_("Enter the Subject text that "
-                                           "you want displayed"),
-                               verbose_name=_('Subject'))
-
-    class Meta:
-        verbose_name = _("Subject")
-        verbose_name_plural = _("Subjects")
-        ordering = ['content']
-
-    def __str__(self):
-        return self.content
-
-
-class Chapter(models.Model):
-    content = models.CharField(max_length=1000,
-                               blank=False,
-                               help_text=_("Enter the Chapter text that "
-                                           "you want displayed"),
-                               verbose_name=_('Chapter'))
-    subject_fk = models.ForeignKey(Subject, on_delete=models.CASCADE)
-    standard_fk = models.ForeignKey(Standard, on_delete=models.CASCADE)
-
-    class Meta:
-        verbose_name = _("Chapter")
-        verbose_name_plural = _("Chapters")
-        ordering = ['content']
-
-    def __str__(self):
-        return self.content
-
-
-class Topic(models.Model):
-    content = models.CharField(max_length=1000,
-                               blank=False,
-                               help_text=_("Enter the Topic text that "
-                                           "you want displayed"),
-                               verbose_name=_('Topic'))
-    subject_fk = models.ForeignKey(Subject, on_delete=models.CASCADE)
-    standard_fk = models.ForeignKey(Standard, on_delete=models.CASCADE)
-    chapter_fk = models.ForeignKey(Chapter, on_delete=models.CASCADE)
-
-    class Meta:
-        verbose_name = _("Topic")
-        verbose_name_plural = _("Topics")
-        ordering = ['content']
 
     def __str__(self):
         return self.content
@@ -734,7 +758,7 @@ def question_upload_post_save(sender, instance, created, *args, **kwargs):
             row_item = line[0].split(',')#the value of entire row
             cate = row_item[7]+'-'+row_item[8]
             cat = Category.objects.filter(category=cate).count()
-            if cat ==0:
+            if cat == 0:
                 Category.objects.create(category=row_item[7]+'-'+row_item[8])
             cat = Category.objects.get(category=row_item[7] + '-' + row_item[8])
             Que = mcq.models.MCQQuestion.objects.filter(content=row_item[1]).count()
