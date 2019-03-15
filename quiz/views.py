@@ -264,3 +264,6 @@ def logout_user(request):
     print('logout function working')
     return redirect('login')
 
+
+def kiddos(request):
+    return render(request, 'kiddos/index.html', {})
