@@ -753,17 +753,27 @@ def question_upload_post_save(sender, instance, created, *args, **kwargs):
         '''
         if using a custom signal
         '''
-        answer_list = ['A','B','C','D',]
+        answer_list = ['A', 'B', 'C', 'D', ]
         for line in reader:
             row_item = line[0].split(',')#the value of entire row
             cate = row_item[7]+'-'+row_item[8]
-            cat = Category.objects.filter(category=cate).count()
-            if cat == 0:
-                Category.objects.create(category=row_item[7]+'-'+row_item[8])
-            cat = Category.objects.get(category=row_item[7] + '-' + row_item[8])
+            cat = add_or_update(tableName=Category, FieldName='category', FieldValue=row_item[7]+'-'+row_item[8])
+            standard = add_or_update(tableName=Standard, FieldName='content', FieldValue=row_item[8])
+            subject = add_or_update(tableName=Subject, FieldName='content', FieldValue=row_item[7])
+            blooms = add_or_update(tableName=BloomsTaxonomy, FieldName='content', FieldValue=row_item[12])
+            chapter = Chapter.objects.filter(content=row_item[9], subject_fk=subject, standard_fk=standard).count()
+            if chapter == 0:
+                Chapter.objects.create(content=row_item[9], subject_fk=subject, standard_fk=standard)
+            chapter = Chapter.objects.get(content=row_item[9], subject_fk=subject, standard_fk=standard)
+
+            topic = Topic.objects.filter(content=row_item[10], subject_fk=subject, standard_fk=standard, chapter_fk=chapter).count()
+            if topic == 0:
+                Topic.objects.create(content=row_item[10], subject_fk=subject, standard_fk=standard, chapter_fk=chapter)
+            topic = Topic.objects.get(content=row_item[10], subject_fk=subject, standard_fk=standard, chapter_fk=chapter)
             Que = mcq.models.MCQQuestion.objects.filter(content=row_item[1]).count()
             if Que == 0:
-                Que = mcq.models.MCQQuestion.objects.create(content=row_item[1], category=cat, answer_order='none')
+                Que = mcq.models.MCQQuestion.objects.create(content=row_item[1], category=cat, answer_order='none', topic_fk=topic,
+                                                            difficulty_level=row_item[11], blooms_fk = blooms)
                 for i in range(4):
                     ans = False
                     if row_item[6] == answer_list[i]:
@@ -775,3 +785,9 @@ def question_upload_post_save(sender, instance, created, *args, **kwargs):
 
 
 post_save.connect(question_upload_post_save, sender=QuestionUpload)
+
+def add_or_update(tableName,FieldName, FieldValue):
+    result_count = tableName.objects.filter(**{FieldName: FieldValue}).count()
+    if result_count == 0:
+        tableName.objects.create(**{FieldName: FieldValue})
+    return tableName.objects.get(**{FieldName: FieldValue})
