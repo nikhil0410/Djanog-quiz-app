@@ -16,12 +16,18 @@ from django.contrib.auth.models import User
 import mcq
 from django.db.models import Q
 from django.contrib import messages
+import datetime
+# from dateutil.relativedelta import relativedelta
+
+    
 
 DIFFICULTY_CHOICE = (
     ('Easy', 'easy'),
     ('Normal', 'normal'),
     ('Hard', 'hard')
 )
+
+
 class CategoryManager(models.Manager):
 
     def new_category(self, category):
@@ -791,3 +797,46 @@ def add_or_update(tableName,FieldName, FieldValue):
     if result_count == 0:
         tableName.objects.create(**{FieldName: FieldValue})
     return tableName.objects.get(**{FieldName: FieldValue})
+
+GENDER_CHOICES = (
+        ('M', 'Male'),
+        ('F', 'Female'),
+    )
+class RegistrationData(models.Model):
+    username=models.CharField(max_length=100)
+    name=models.CharField(max_length=100)
+    password=models.CharField(max_length=100)
+    email=models.CharField(max_length=60)
+    contact_number=models.CharField(max_length=100)
+    whatsapp_number=models.CharField(max_length=100)
+    dob = models.DateField(max_length=8)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='M', null=True)
+    address=models.CharField(max_length=100)
+    state=models.CharField(max_length=100)
+    city=models.CharField(max_length=100)
+    pin=models.CharField(max_length=100)
+   
+    fathers_name=models.CharField(max_length=100)
+    fcontact_number=models.CharField(max_length=100)
+    fwhatsapp_number=models.CharField(max_length=100)
+
+   
+    mothers_name=models.CharField(max_length=100)
+    mcontact_number=models.CharField(max_length=100)
+    mwhatsapp_number=models.CharField(max_length=100)
+
+    paddress=models.CharField(max_length=100)
+    pstate=models.CharField(max_length=100)
+    pcity=models.CharField(max_length=100)
+    ppin=models.CharField(max_length=100)
+
+    school_name=models.CharField(max_length=100)
+    class_upto=models.CharField(max_length=100)
+    percentage=models.CharField(max_length=100)
+    saddress=models.CharField(max_length=100)
+    sstate=models.CharField(max_length=100)
+    scity=models.CharField(max_length=100)
+    spin=models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.username
