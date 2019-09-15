@@ -1,14 +1,18 @@
 from django.conf.urls import url
 from .views import QuizListView, CategoriesListView,\
     ViewQuizListByCategory, QuizUserProgressView, QuizMarkingList,\
-    QuizMarkingDetail, QuizDetailView, QuizTake, index, login_user, logout_user, kiddos
+    QuizMarkingDetail, QuizDetailView, QuizTake, index, login_user, logout_user, kiddos,register,addUser,signup
 from django.urls import path
-
+from . import views
 
 urlpatterns = [
     url(regex=r'^$', view=index, name='index'),
     url(regex=r'^login/$', view=login_user, name='login'),
-    url(regex=r'^kid/$', view=kiddos, name='login'),
+    url(regex=r'^kid/$', view=kiddos, name='kiddos'),
+    url(regex=r'^register/$', view=register, name='register'),
+    url(regex=r'^signup/$', view=signup, name='signup'),
+   
+    url(regex=r'^addUser/$', view=addUser, name='user'),
     url(regex=r'^logout/$', view=logout_user, name='logout'),
     url(regex=r'^quizzes/$',
         view=QuizListView.as_view(),

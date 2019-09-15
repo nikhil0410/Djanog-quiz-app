@@ -11,6 +11,11 @@ from .models import Quiz, Category, Progress, Sitting, Question
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+from django.contrib.auth import login, authenticate
+from django.shortcuts import render, redirect
+from .forms import RegistrationForm,SignUpForm
+from .models import ProfileDetails
+from django.contrib.auth.forms import UserCreationForm
 
 
 class QuizMarkerMixin(object):
@@ -256,6 +261,61 @@ def login_user(request):
             return redirect('login')
     else:
         return render(request, 'login.html', {})
+
+def signup(request):
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)
+            login(request, user)
+            return redirect('login')
+    else:
+        form = SignUpForm()
+    return render(request, 'signup.html', {'form': form})
+def register(request):
+    context={"form":RegistrationForm}
+    def __str__(self):
+        return self.username
+    return render(request, 'registeration.html', context)
+
+def addUser(request):
+    form=RegistrationForm(request.POST)
+    if form.is_valid():
+        register=ProfileDetails(username=form.cleaned_data['username'],
+                                  password=form.cleaned_data['password'],
+                                  name=form.cleaned_data['name'],
+                                  email=form.cleaned_data['email'],
+                                  contact_number=form.cleaned_data['contact_number'],
+                                  whatsapp_number=form.cleaned_data['whatsapp_number'],
+                                  dob=form.cleaned_data['dob'],
+                                  gender=form.cleaned_data['gender'],
+                                  address=form.cleaned_data['address'],
+                                  state=form.cleaned_data['state'],
+                                  city=form.cleaned_data['city'],
+                                  pin=form.cleaned_data['pin'],
+                                  fathers_name=form.cleaned_data['fathers_name'],
+                                  fcontact_number=form.cleaned_data['fcontact_number'],
+                                  fwhatsapp_number=form.cleaned_data['fwhatsapp_number'],
+                                  mothers_name=form.cleaned_data['mothers_name'],
+                                  mcontact_number=form.cleaned_data['mcontact_number'],
+                                  mwhatsapp_number=form.cleaned_data['mwhatsapp_number'],
+                                  paddress=form.cleaned_data['address'],
+                                  pstate=form.cleaned_data['state'],
+                                  pcity=form.cleaned_data['city'],
+                                  ppin=form.cleaned_data['pin'],
+                                  school_name=form.cleaned_data['school_name'],
+                                  class_upto=form.cleaned_data['class_upto'],
+                                  percentage=form.cleaned_data['percentage'],
+                                  saddress=form.cleaned_data['address'],
+                                  sstate=form.cleaned_data['state'],
+                                  scity=form.cleaned_data['city'],
+                                  spin=form.cleaned_data['pin']
+                                  )
+        register.save()
+    return redirect('login')
 
 
 def logout_user(request):
